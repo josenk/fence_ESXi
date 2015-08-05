@@ -1,0 +1,96 @@
+#!/usr/bin/python
+
+import atexit, sys, re, pexpect, exceptions
+sys.path.append("/usr/share/fence")
+from fencing import *
+
+def get_list(conn, options):
+	outlets = {}
+	action = "vim-cmd vmsvc/getallvms|grep '^[0-9]'"
+	res0 = conn.send_eol(action)
+	conn.log_expect(options, options["--command-prompt"], int(options["--shell-timeout"]))
+	machine_lines = conn.before.split("\n")
+	for machine in machine_lines:
+		mach = machine.split()
+		if mach[0].isdigit():
+			#print mach[0]
+			action = "vim-cmd vmsvc/power.getstate " + mach[0]
+			conn.send_eol(action )
+			conn.log_expect(options, options["--command-prompt"], int(options["--shell-timeout"]))
+			s = re.compile('^\s*Powered \s*(on|off)\s*$', re.IGNORECASE)
+			lines = conn.before.split("\n")
+			for x in lines:
+				res1 = s.search(x)
+				if (res1 != None):
+					if res1.group(1) == "on": mach_status = "on"
+					if res1.group(1) == "off": mach_status = "off"
+					outlets[mach[1]] = (mach[0], mach_status)
+	return outlets
+
+def get_power_status(conn, options):
+	action = "vim-cmd vmsvc/power.getstate `vim-cmd vmsvc/getallvms|grep '^[0-9]\+ \+" + options["--plug"] + " '|awk '{ print $1 }'`"
+
+	conn.send_eol(action + " " + options["--plug"])
+	conn.log_expect(options, options["--command-prompt"], int(options["--shell-timeout"]))
+
+	s = re.compile('^\s*Powered \s*(on|off)\s*$', re.IGNORECASE)
+	lines = conn.before.split("\n")
+	for x in lines:
+		res = s.search(x)
+		if (res != None):
+			if res.group(1) == "on": return "on"
+			if res.group(1) == "off": return "off"
+	fail(EC_STATUS)
+
+def set_power_status(conn, options):
+	action = {
+		'on' : "vim-cmd vmsvc/power.on `vim-cmd vmsvc/getallvms|grep '^[0-9]\+ \+" + options["--plug"] + " '|awk '{ print $1 }'`",
+		'off': "vim-cmd vmsvc/power.off `vim-cmd vmsvc/getallvms|grep '^[0-9]\+ \+" + options["--plug"] + " '|awk '{ print $1 }'`"
+	}[options["--action"]]
+
+	conn.send_eol(action + " " + options["--plug"])
+	conn.log_expect(options, options["--command-prompt"], int(options["--power-timeout"]))
+
+def main():
+	#device_opt = [  "ipaddr", "login", "passwd", "cmd_prompt", "secure", "port" ]
+	device_opt = [  "ipaddr", "login", "passwd", "cmd_prompt", "secure" ]
+
+	atexit.register(atexit_handler)
+
+	all_opt["cmd_prompt"]["default"] = [ ":~]" ]
+	all_opt["secure"]["default"] = "1"
+        all_opt["ssh_options"]["default"] = "-2"
+
+	options = check_input(device_opt, process_input(device_opt))
+	options["eol"] = "\n"
+
+	docs = { }
+	docs["shortdesc"] = "Fence agent for ESXi"
+	docs["longdesc"] = "fence_ESXi is an I/O Fencing agent which can be used with VMware ESXi"
+	docs["vendorurl"] = "http://www.jintegrate.co"
+	show_docs(options, docs)
+
+	##
+	## Operate the fencing device
+	####
+	conn = fence_login(options)
+
+	result = fence_action(conn, options, set_power_status, get_power_status, get_list)
+
+	##
+	## Logout from system
+	##
+	## In some special unspecified cases it is possible that 
+	## connection will be closed before we run close(). This is not 
+	## a problem because everything is checked before.
+	######
+	try:
+		conn.send_eol("exit")
+		conn.close()
+	except:
+		pass
+	
+	sys.exit(result)
+
+if __name__ == "__main__":
+	main()
