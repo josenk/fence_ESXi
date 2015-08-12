@@ -83,6 +83,7 @@ GUI
   Fence Instance Name "_USE_ANY_NAME_"
   ipaddr "_IP of ESXi host_"
   login  "root"    (or specify an account on ESXi host with permissions to stop/start VMs)
+  port             (leave blank)
   Optional Arguments
   -->pcmk_host_map "_see NOTE below_"
   -->password "_enter_pw_"
