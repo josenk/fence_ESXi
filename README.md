@@ -1,9 +1,9 @@
 Introduction
 ------------
 
-/usr/sbin/fence_ESXi is a STONITH script for Pacemaker <http://clusterlabs.org> to fence VM's running on VMware ESXi 5.x (no vCenter required).   It's used by Pacemaker to fence VMs.  Fencing a system is done by powering off or rebooting the sytem.  It's the only way to guarantee release of all resources to prevent possible data corruption.  (for example, two systems try to write to the same filesystem.)
+/usr/sbin/fence_ESXi is a STONITH script for Pacemaker <http://clusterlabs.org> to fence VM's running on VMware ESXi 6.x and 5.x (no vCenter required).   It's used by Pacemaker to fence VMs.  Fencing a system is done by powering off or rebooting the sytem.  It's the only way to guarantee release of all resources to prevent possible data corruption.  (for example, two systems try to write to the same filesystem.)
 
-I tested and wrote this device for Pacemaker 1.1 running on RHEL 7.0 & 7.1, but it should run on any version of Pacemaker.  Pacemaker is now the default clustering software included with RedHat 7.x and Centos 7.x.  ssh access must be enabled on the ESXi host!
+I tested and wrote this device for Pacemaker 1.1 running on RHEL 7.x, but it should run on any version of Pacemaker.  Pacemaker is now the default clustering software included with RedHat 7.x and Centos 7.x.  ssh access must be enabled on the ESXi host!
 
 
 Installation
