@@ -134,8 +134,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Support
 -------
   Website : http://www.jintegrate.co
-
-  github  : http://github.com/josenk/esxi_STONITH
+  github  : https://github.com/josenk/fence_ESXi
+  bitcoin : 1HCTVkmSXepQahJfvuxQRhUMem1HpHq3Mq
+  paypal  : josenk@jintegrate.co
 
   Please support my work and efforts contributing to the Linux community.  A $25 payment per server would be highly appreciated.
 
