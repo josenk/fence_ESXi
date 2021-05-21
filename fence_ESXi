@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import atexit, sys, re, pexpect, exceptions
+import atexit, sys, re
 sys.path.append("/usr/share/fence")
 from fencing import *
 
@@ -8,7 +8,7 @@ def get_list(conn, options):
 	outlets = {}
 	action = "vim-cmd vmsvc/getallvms|grep '^[0-9]'"
 	res0 = conn.send_eol(action)
-	conn.log_expect(options, options["--command-prompt"], int(options["--shell-timeout"]))
+	conn.log_expect(options["--command-prompt"], int(options["--shell-timeout"]))
 	machine_lines = conn.before.split("\n")
 	for machine in machine_lines:
 		mach = machine.split()
@@ -16,7 +16,7 @@ def get_list(conn, options):
 			#print mach[0]
 			action = "vim-cmd vmsvc/power.getstate " + mach[0]
 			conn.send_eol(action )
-			conn.log_expect(options, options["--command-prompt"], int(options["--shell-timeout"]))
+			conn.log_expect(options["--command-prompt"], int(options["--shell-timeout"]))
 			s = re.compile('^\s*Powered \s*(on|off)\s*$', re.IGNORECASE)
 			lines = conn.before.split("\n")
 			for x in lines:
@@ -31,7 +31,7 @@ def get_power_status(conn, options):
 	action = "vim-cmd vmsvc/power.getstate `vim-cmd vmsvc/getallvms|grep '^[0-9]\+ \+" + options["--plug"] + " '|awk '{ print $1 }'`"
 
 	conn.send_eol(action + " " + options["--plug"])
-	conn.log_expect(options, options["--command-prompt"], int(options["--shell-timeout"]))
+	conn.log_expect(options["--command-prompt"], int(options["--shell-timeout"]))
 
 	s = re.compile('^\s*Powered \s*(on|off)\s*$', re.IGNORECASE)
 	lines = conn.before.split("\n")
@@ -49,7 +49,7 @@ def set_power_status(conn, options):
 	}[options["--action"]]
 
 	conn.send_eol(action + " " + options["--plug"])
-	conn.log_expect(options, options["--command-prompt"], int(options["--power-timeout"]))
+	conn.log_expect(options["--command-prompt"], int(options["--power-timeout"]))
 
 def main():
 	device_opt = [  "ipaddr", "login", "passwd", "cmd_prompt", "secure", "port" ]
